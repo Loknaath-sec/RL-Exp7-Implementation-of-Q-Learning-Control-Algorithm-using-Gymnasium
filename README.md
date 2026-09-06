@@ -341,6 +341,9 @@ The output will vary slightly between executions because `FrozenLake-v1` with `i
 ### Average Reward
 <img width="478" height="42" alt="image" src="https://github.com/user-attachments/assets/229535f9-92cd-4349-aa13-8aaa9b82c685" />
 
+### Plot Learning Curve
+<img width="912" height="653" alt="image" src="https://github.com/user-attachments/assets/b65604c7-aa54-43ab-9336-0f27193f8d28" />
+
 
 ## Result
 
