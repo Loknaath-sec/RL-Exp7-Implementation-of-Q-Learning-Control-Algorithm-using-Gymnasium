@@ -160,71 +160,164 @@ Initially, epsilon is high so that the agent explores the environment. As traini
 ---
 
 ## Python Program
+```
+Name: Loknaath P
+Reg.No: 212223240080
+```
 
-```python
+```py
+import gymnasium as gym
+import numpy as np
+import matplotlib.pyplot as plt
+```
+
+```py
+# -------------------------------------------------
+# Create FrozenLake Environment
+# -------------------------------------------------
+
+env = gym.make("FrozenLake-v1", is_slippery=True)
+
+n_states = env.observation_space.n
+n_actions = env.action_space.n
+```
+
+```py
+# -------------------------------------------------
+# Hyperparameters
+# -------------------------------------------------
+
+learning_rate = 0.8
+gamma = 0.95
+epsilon = 1.0
+epsilon_min = 0.01
+epsilon_decay = 0.995
+num_episodes = 20000
+```
+
+```py
+# -------------------------------------------------
+# Initialize Q-table
+# -------------------------------------------------
+
+Q = np.zeros((n_states, n_actions))
 
 
 # -------------------------------------------------
 # Epsilon-Greedy Action Selection
 # -------------------------------------------------
 
-def choose_action(state):
+def choose_action(state, epsilon):
     if np.random.random() < epsilon:
         return env.action_space.sample()
-    else:
-        return np.argmax(Q[state])
+    return int(np.argmax(Q[state]))
+```
 
+```py
 # -------------------------------------------------
 # Q-Learning Training
 # -------------------------------------------------
 
 episode_rewards = []
 
-for episode in range(episodes):
-
-    state, info = env.reset()
+for episode in range(num_episodes):
+    state, _ = env.reset()
     total_reward = 0
-    done = False
+    terminated = False
+    truncated = False
 
-    while not done:
+    while not (terminated or truncated):
+        action = choose_action(state, epsilon)
 
-        # Choose action
-        action = choose_action(state)
+        next_state, reward, terminated, truncated, _ = env.step(action)
 
-        # Take action
-        next_state, reward, terminated, truncated, info = env.step(action)
-
-        done = terminated or truncated
-
-        # Q-Learning update
+        # Q-learning update:
+        # Q(s,a) <- Q(s,a) + alpha * [r + gamma*max Q(s',a') - Q(s,a)]
         if terminated:
             target = reward
         else:
             target = reward + gamma * np.max(Q[next_state])
 
-        Q[state, action] = Q[state, action] + learning_rate * (
-            target - Q[state, action]
-        )
+        Q[state, action] += learning_rate * (target - Q[state, action])
 
         state = next_state
         total_reward += reward
 
     episode_rewards.append(total_reward)
 
-    # Reduce exploration
-    epsilon = max(
-        epsilon_min,
-        epsilon * epsilon_decay
-    )
+    # Gradually reduce exploration.
+    epsilon = max(epsilon_min, epsilon * epsilon_decay)
 
-# -------------------------------------------------
-# Extract Value Function and Policy
-# -------------------------------------------------
-
+# Derive the state-value function and greedy policy from the learned Q-table.
 state_values = np.max(Q, axis=1)
-
 learned_policy = np.argmax(Q, axis=1)
+```
 
+```py
+# -------------------------------------------------
+# Display Functions
+# -------------------------------------------------
+
+def print_value_function(values):
+    print("\nEstimated State-Value Function:")
+    print(np.round(values.reshape(4, 4), 3))
+
+
+def print_policy(policy):
+    action_symbols = {
+        0: "L",
+        1: "D",
+        2: "R",
+        3: "U"
+    }
+
+    policy_grid = np.array(
+        [action_symbols[action] for action in policy]
+    ).reshape(4, 4)
+
+    print("\nLearned Policy:")
+    print(policy_grid)
+```
+
+```py
+# -------------------------------------------------
+# Output
+# -------------------------------------------------
+
+print("\nFinal Q-table:")
+print(np.round(Q, 3))
+
+print_value_function(state_values)
+print_policy(learned_policy)
+
+
+average_reward = np.mean(episode_rewards[-1000:])
+print("\nAverage reward over last 1000 episodes:", average_reward)
+```
+
+```py
+# -------------------------------------------------
+# Plot Learning Curve
+# -------------------------------------------------
+print("Name: LOKNAATH P")
+print("Reg No: 212223240080")
+window = 500
+
+moving_average = np.convolve(
+    episode_rewards,
+    np.ones(window) / window,
+    mode="valid"
+)
+
+plt.figure(figsize=(8, 5))
+plt.plot(moving_average)
+plt.xlabel("Episode")
+plt.ylabel("Average Reward")
+plt.title("Q-Learning Curve - FrozenLake")
+plt.grid(True)
+plt.show()
+
+env.close()
 ```
 
 ---
@@ -234,23 +327,19 @@ learned_policy = np.argmax(Q, axis=1)
 The output will vary slightly between executions because `FrozenLake-v1` with `is_slippery=True` is stochastic.
 
 ### Number of States and Actions
-<img width="221" height="60" alt="image" src="https://github.com/user-attachments/assets/b617e6d7-7203-47a0-9c7d-055d6bf25a81" />
-
+<img width="221" height="60" alt="image" src="https://github.com/user-attachments/assets/cdd348e7-0ee2-42e9-a3a4-dd854178c216" />
 
 ### Final Q-Table
-<img width="500" height="685" alt="image" src="https://github.com/user-attachments/assets/389060fa-f421-400d-a13c-50c970babf1c" />
-
-
+<img width="311" height="392" alt="image" src="https://github.com/user-attachments/assets/dd180566-8244-41c1-b3f5-543e7e42ae04" />
 
 ### Estimated State-Value Function
-<img width="405" height="131" alt="image" src="https://github.com/user-attachments/assets/780dbf44-8aa7-4086-8119-88a07d91308e" />
-
+<img width="397" height="137" alt="image" src="https://github.com/user-attachments/assets/b6ac42e2-7ff7-4b1e-adb8-1e137a9f5a2b" />
 
 ### Learned Policy
-<img width="205" height="123" alt="image" src="https://github.com/user-attachments/assets/23937239-2c76-4b2e-bb70-cf76e3dfdad0" />
+<img width="237" height="126" alt="image" src="https://github.com/user-attachments/assets/20c503ac-a747-4094-b4b9-614452d0d9c9" />
 
 ### Average Reward
-<img width="456" height="29" alt="image" src="https://github.com/user-attachments/assets/85b3701b-6ff0-4da3-a996-2631ed3998d5" />
+<img width="478" height="42" alt="image" src="https://github.com/user-attachments/assets/229535f9-92cd-4349-aa13-8aaa9b82c685" />
 
 
 ## Result
